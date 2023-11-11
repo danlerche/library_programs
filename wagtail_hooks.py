@@ -1,5 +1,5 @@
 from wagtail.snippets.models import register_snippet
-from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup, DeleteView
+from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
 from wagtail.admin.panels import FieldPanel, TabbedInterface, ObjectList
 from wagtail.admin.ui.tables import UpdatedAtColumn
 from .models import (EventCategory, Event, EventAudience, EventAge, EventAge, FullCalendarLink, RegistrationUserFormBuilder, Registration, RegistrationFormPage)
@@ -52,14 +52,6 @@ class LinkToCalendarAdmin(SnippetViewSet):
     icon = 'link'
     base_url_path = "calendar_link"
 
-class DeleteUserInfoView(DeleteView):
-    #deletes the user info when a regration is also deleted
-    def get_success_message(self):
-        cancel_user = RegistrationUserFormBuilder.objects.get(id=self.object.user_info.id)
-        cancel_user.delete()
-        msg = 'The following user info has been deleted:  ' + str(cancel_user)
-        return msg
-
 class FilterByEvent(WagtailFilterSet):
     class Meta:
         model = Registration
@@ -73,7 +65,6 @@ class RegistrationAdmin(SnippetViewSet):
     list_display = ('name','email', 'event_name', 'registration_date' ,'wait_listed')
     index_template_name = 'library_programs/registration/index.html'
     filterset_class = FilterByEvent
-    delete_view_class = DeleteUserInfoView
     edit_template_name = 'library_programs/registration/admin_snippet/edit.html'
 
     edit_handler = TabbedInterface([
@@ -86,7 +77,7 @@ class RegistrationAdmin(SnippetViewSet):
     def after_snippet_delete(request, objects):
         for obj in objects: 
             user_id = obj.user_info.id
-            user_info = JoinusUserFormBuilder.objects.get(id=user_id)
+            user_info = RegistrationUserFormBuilder.objects.get(id=user_id)
             user_info.delete()
         #return HttpResponse(f"{user_info} has been deleted", content_type="text/plain")
         return request
