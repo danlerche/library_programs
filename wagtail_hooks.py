@@ -10,8 +10,20 @@ import json, csv
 from django.http import HttpResponse
 from wagtail import hooks
 from wagtail.snippets.bulk_actions.snippet_bulk_action import SnippetBulkAction
-from wagtail.admin.menu import MenuItem
 from wagtail.admin.views.bulk_action import BulkAction
+from .views import events_with_registration
+from django.urls import path, reverse
+from wagtail.admin.menu import MenuItem
+
+@hooks.register('register_admin_urls')
+def event_with_reg_url():
+    return [
+        path('events_with_registration/', events_with_registration, name='event_regisitration'),
+    ]
+
+@hooks.register('register_admin_menu_item')
+def register_event_reg_menu_item():
+    return MenuItem('Event Registrations', reverse('event_regisitration'), icon_name="date")
 
 class EventCategoryAdmin(SnippetViewSet):
     model = EventCategory
@@ -35,7 +47,7 @@ class EventAgeAdmin(SnippetViewSet):
 class EventFilterSet(WagtailFilterSet):
     class Meta:
         model = Event
-        fields = ['event_category_id', 'age_range', 'event_date']
+        fields = ['enable_registration', 'event_category_id', 'age_range', 'event_date']
 
 class EventAdmin(SnippetViewSet):
     model = Event
@@ -43,6 +55,7 @@ class EventAdmin(SnippetViewSet):
     icon = 'date'
     list_display = ('title', 'event_date', 'time_from', 'time_to', 'repeats', 'until', 'featured_on_home_page', UpdatedAtColumn())
     #list_filter = {'event_category_id', 'age_range'}
+    index_template_name = 'library_programs/registration/admin_snippet/event_admin_index.html'
     filterset_class = EventFilterSet
     base_url_path = "event"
 
@@ -162,6 +175,7 @@ class EventAdminGroup(SnippetViewSetGroup):
     menu_label = 'Programs & Events'
     menu_icon = 'date'
     menu_order = 200
-    items = (EventAdmin, EventCategoryAdmin, EventAudienceAdmin, EventAgeAdmin, LinkToCalendarAdmin, RegistrationFormAdmin, RegistrationAdmin)
+    items = (EventAdmin, EventCategoryAdmin, EventAudienceAdmin, EventAgeAdmin, LinkToCalendarAdmin, 
+        RegistrationFormAdmin, RegistrationAdmin)
 
 register_snippet(EventAdminGroup)

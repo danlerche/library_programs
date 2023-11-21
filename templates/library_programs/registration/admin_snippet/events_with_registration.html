@@ -1,0 +1,26 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}Events with Registration {% endblock %}
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title="Events Registrations" icon="date" %}
+    <div class="nice-padding">
+    <div id="listing-results" class="snippets">
+    <table class="listing">
+    <tbody>
+    <tr>
+    <th>Event Name</th><th>Registered</th><th>Wait Listed</th><th>Registration Spots</th><th>Waitlist Spots</th>
+    </tr>
+    {% for reg in registration_info %}
+    <tr>
+    <td>{{ reg.event_title }}</td>
+    <td>{{ reg.registered }}</td>
+    <td>{{ reg.wait_listed }}</td>
+    <td>{{ reg.spots_available }}</td>
+    <td>{{ reg.wait_list_spots }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
+    </div>
+{% endblock %}
