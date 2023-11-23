@@ -44,7 +44,6 @@ class EventAdmin(SnippetViewSet):
     menu_label = 'Event'
     #icon = 'date'
     list_display = ('title', 'event_date', 'time_from', 'time_to', 'repeats', 'until', 'featured_on_home_page', UpdatedAtColumn())
-    #list_filter = {'event_category_id', 'age_range'}
     index_template_name = 'library_programs/registration/admin_snippet/event_admin_index.html'
     filterset_class = EventFilterSet
     base_url_path = "library-programs/event"
