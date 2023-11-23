@@ -3,8 +3,6 @@ from django.db.models import Count
 from django.shortcuts import render
 from .models import Event, Registration
 
-#list_display = ('title', 'total_registered', 'spaces_remaining', 'total_spaces', 'waitlist_spots', 'waitlist_remaining')
-
 def events_with_registration(request):
 	event_qs = Event.objects.filter(enable_registration=True)
 	reg_qs = Registration.objects.all()

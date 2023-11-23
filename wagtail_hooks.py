@@ -13,36 +13,26 @@ from wagtail.snippets.bulk_actions.snippet_bulk_action import SnippetBulkAction
 from wagtail.admin.views.bulk_action import BulkAction
 from .views import events_with_registration
 from django.urls import path, reverse
-from wagtail.admin.menu import MenuItem
-
-@hooks.register('register_admin_urls')
-def event_with_reg_url():
-    return [
-        path('events_with_registration/', events_with_registration, name='event_regisitration'),
-    ]
-
-@hooks.register('register_admin_menu_item')
-def register_event_reg_menu_item():
-    return MenuItem('Event Registrations', reverse('event_regisitration'), icon_name="date")
+from wagtail.admin.menu import Menu, MenuItem, SubmenuMenuItem
 
 class EventCategoryAdmin(SnippetViewSet):
     model = EventCategory
     menu_label = 'Event Category'
-    icon = 'list-ul'
-    base_url_path = "category"
+    #icon = 'list-ul'
+    base_url_path = "library-programs/category"
 
 class EventAudienceAdmin(SnippetViewSet):
     model = EventAudience
     menu_label = 'Audience'
-    icon = 'list-ul'
+    #icon = 'list-ul'
     list_display = ('audience_name',)
-    base_url_path = "audience"
+    base_url_path = "library-programs/audience"
 
 class EventAgeAdmin(SnippetViewSet):
     model = EventAge
     menu_label = 'Age Range'
-    icon = 'list-ul'
-    base_url_path = "age"
+    #icon = 'list-ul'
+    base_url_path = "library-programs/age"
 
 class EventFilterSet(WagtailFilterSet):
     class Meta:
@@ -52,18 +42,18 @@ class EventFilterSet(WagtailFilterSet):
 class EventAdmin(SnippetViewSet):
     model = Event
     menu_label = 'Event'
-    icon = 'date'
+    #icon = 'date'
     list_display = ('title', 'event_date', 'time_from', 'time_to', 'repeats', 'until', 'featured_on_home_page', UpdatedAtColumn())
     #list_filter = {'event_category_id', 'age_range'}
     index_template_name = 'library_programs/registration/admin_snippet/event_admin_index.html'
     filterset_class = EventFilterSet
-    base_url_path = "event"
+    base_url_path = "library-programs/event"
 
 class LinkToCalendarAdmin(SnippetViewSet):
     model = FullCalendarLink
     menu_label = 'Link to the full calendar page'
-    icon = 'link'
-    base_url_path = "calendar_link"
+    #icon = 'link'
+    base_url_path = "library-programs/calendar_link"
 
 class FilterByEvent(WagtailFilterSet):
     class Meta:
@@ -73,8 +63,8 @@ class FilterByEvent(WagtailFilterSet):
 class RegistrationAdmin(SnippetViewSet):
     model = Registration
     menu_label = 'Registrations' 
-    icon = 'doc-full'
-    base_url_path = 'registration'
+    #icon = 'doc-full'
+    base_url_path = 'library-programs/registration'
     list_display = ('name','email', 'event_name', 'registration_date' ,'wait_listed')
     index_template_name = 'library_programs/registration/index.html'
     filterset_class = FilterByEvent
@@ -168,14 +158,49 @@ class ExportCSV(BulkAction):
 class RegistrationFormAdmin(SnippetViewSet):
     model = RegistrationFormPage
     menu_label = 'Registration Form'
-    icon = 'form'
-    base_url_path = "registration-form"
+    #icon = 'form'
+    base_url_path = "library-programs/registration-form"
 
 class EventAdminGroup(SnippetViewSetGroup):
-    menu_label = 'Programs & Events'
+    menu_label = 'Programs & Events Snippet Hidden'
     menu_icon = 'date'
     menu_order = 200
     items = (EventAdmin, EventCategoryAdmin, EventAudienceAdmin, EventAgeAdmin, LinkToCalendarAdmin, 
         RegistrationFormAdmin, RegistrationAdmin)
 
+#this would normally create a Programs & Events Menu Item, but it's been hidden with the following contstruct_main_menu hook below
+#this will register the snippet URLs
 register_snippet(EventAdminGroup)
+
+#creates an events with registration admin view, that couldn't be made with the SnippetViewSet
+@hooks.register('register_admin_urls')
+def event_with_reg_url():
+    return [
+        path('library-programs/events_with_registration/', events_with_registration, name='event_regisitration'),
+    ]
+
+#combines the events with registration viewset with the other model links
+@hooks.register('register_admin_menu_item')
+def register_event_reg_menu_item():
+    submenu = Menu(items=[
+        MenuItem('Event', '/admin/library-programs/event', icon_name="date"),
+        MenuItem('Event Category', '/admin/library-programs/category', icon_name="date"),
+        MenuItem('Audience', '/admin/library-programs/audience', icon_name="list-ul"),
+        MenuItem('Age Range', '/admin/library-programs/age', icon_name="list-ul"),
+        MenuItem('Registration Forms', '/admin/library-programs/calendar_link/', icon_name="form"),
+        MenuItem('Calendar Link', '/admin/library-programs/registration-form/', icon_name="link"),
+        MenuItem('Registrations', '/admin/library-programs/registration/', icon_name="doc-full"),
+        MenuItem('Event Registrations', reverse('event_regisitration'), icon_name="list-ul"),
+    ])
+    #could we also get the library programs menu and append the sub menu?
+    return SubmenuMenuItem('Programs & Events', submenu, icon_name='date')
+
+#hides the snippetViewSet Admin Links as this is now done with the register_admin_menu_item hook
+@hooks.register('construct_main_menu')
+def hide_program_and_event_snippet_menu(request, menu_items):
+    for item in menu_items:
+        menu_items[:] = [item for item in menu_items if item.name != 'programs-events-snippet-hidden']
+        #pushes the order of the menu higher in the list
+        if item.name == 'programs-events':
+            item.order = 290
+            break
