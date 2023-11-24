@@ -363,7 +363,7 @@ class Event(Page, Orderable):
                     user_id = get_primary
                     registration = Registration(event_name=event_id, user_info_id=get_primary[0], wait_list=0)
                     registration.save()
-                    messages.success(request, 'You have succesfully registered for ' + self.title)
+                    #messages.success(request, 'You have succesfully registered for ' + self.title)
                     status = 'registered'
                     #email function here
                 elif registration_form.is_valid() and reg_spots_remaining == 0 and wait_list_remaining > 0:
@@ -371,7 +371,7 @@ class Event(Page, Orderable):
                     user_id = get_primary
                     registration = Registration(event_name=event_id, user_info_id=get_primary[0], wait_list=1)
                     registration.save()
-                    messages.success(request, 'You have been added to the waitlist for ' + self.title)
+                    #messages.success(request, 'You have been added to the waitlist for ' + self.title)
                     status = 'waitlisted'
                     #email function here
                 
