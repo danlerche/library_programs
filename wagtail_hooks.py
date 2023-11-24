@@ -186,8 +186,8 @@ def register_event_reg_menu_item():
         MenuItem('Event Category', '/admin/library-programs/category', icon_name="date"),
         MenuItem('Audience', '/admin/library-programs/audience', icon_name="list-ul"),
         MenuItem('Age Range', '/admin/library-programs/age', icon_name="list-ul"),
-        MenuItem('Registration Forms', '/admin/library-programs/calendar_link/', icon_name="form"),
-        MenuItem('Calendar Link', '/admin/library-programs/registration-form/', icon_name="link"),
+        MenuItem('Calendar Link', '/admin/library-programs/calendar_link/', icon_name="form"),
+        MenuItem('Registration Forms', '/admin/library-programs/registration-form/', icon_name="link"),
         MenuItem('Registrations', '/admin/library-programs/registration/', icon_name="doc-full"),
         MenuItem('Event Registrations', reverse('event_regisitration'), icon_name="list-ul"),
     ])
