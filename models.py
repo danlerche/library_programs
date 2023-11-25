@@ -559,4 +559,4 @@ class Registration(models.Model):
         return self.event_name.title
 
     class Meta:
-        verbose_name = "Event Registration"
+        verbose_name = "Registration"

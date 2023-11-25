@@ -157,6 +157,7 @@ class ExportCSV(BulkAction):
 class RegistrationFormAdmin(SnippetViewSet):
     model = RegistrationFormPage
     menu_label = 'Registration Form'
+    index_template_name = 'library_programs/registration/registration_form.html'
     #icon = 'form'
     base_url_path = "library-programs/registration-form"
 
@@ -183,13 +184,13 @@ def event_with_reg_url():
 def register_event_reg_menu_item():
     submenu = Menu(items=[
         MenuItem('Event', '/admin/library-programs/event', icon_name="date"),
-        MenuItem('Event Category', '/admin/library-programs/category', icon_name="date"),
-        MenuItem('Audience', '/admin/library-programs/audience', icon_name="list-ul"),
-        MenuItem('Age Range', '/admin/library-programs/age', icon_name="list-ul"),
-        MenuItem('Calendar Link', '/admin/library-programs/calendar_link/', icon_name="form"),
-        MenuItem('Registration Forms', '/admin/library-programs/registration-form/', icon_name="link"),
-        MenuItem('Registrations', '/admin/library-programs/registration/', icon_name="doc-full"),
-        MenuItem('Event Registrations', reverse('event_regisitration'), icon_name="list-ul"),
+        MenuItem('Event Category', '/admin/library-programs/category', icon_name="plus"),
+        MenuItem('Audience', '/admin/library-programs/audience', icon_name="group"),
+        MenuItem('Age Range', '/admin/library-programs/age', icon_name="resubmit"),
+        MenuItem('Calendar Link', '/admin/library-programs/calendar_link/', icon_name="link"),
+        MenuItem('Events w/ Registrations', reverse('event_regisitration'), icon_name="calendar-alt"),
+        MenuItem('Registration Forms', '/admin/library-programs/registration-form/', icon_name="form"),
+        MenuItem('Registrations', '/admin/library-programs/registration/', icon_name="clipboard-list"),
     ])
     #could we also get the library programs menu and append the sub menu?
     return SubmenuMenuItem('Programs & Events', submenu, icon_name='date')
