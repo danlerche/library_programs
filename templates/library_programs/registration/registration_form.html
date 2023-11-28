@@ -34,4 +34,17 @@
         {% trans "Select all snippets in listing" as select_all_text %}
         {% include 'wagtailadmin/bulk_actions/footer.html' with select_all_obj_text=select_all_text app_label=model_opts.app_label model_name=model_opts.model_name objects=page_obj %}
     </div>
+
+ <script>
+// Find all links with the original href pattern
+$("#registration-form-listing-results a[href^='/admin/library-programs/registration-form/edit/']").each(function() {
+    var oldHref = $(this).attr("href");
+    // Extract the [id] from the old href
+    var id = oldHref.match(/\/admin\/library-programs\/registration-form\/edit\/(\d+)\//)[1];
+    // Build the new href with the transformed format
+    var newHref = "/admin/pages/" + id + "/edit/";
+    // Update the href attribute
+    $(this).attr("href", newHref);
+});  
+    </script>
 {% endblock %}
