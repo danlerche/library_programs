@@ -14,8 +14,6 @@ from wagtail.admin.views.bulk_action import BulkAction
 from .views import events_with_registration
 from django.urls import path, reverse
 from wagtail.admin.menu import Menu, MenuItem, SubmenuMenuItem
-from django.utils.safestring import mark_safe
-from django.templatetags.static import static
 
 class EventCategoryAdmin(SnippetViewSet):
     model = EventCategory
@@ -206,11 +204,3 @@ def hide_program_and_event_snippet_menu(request, menu_items):
         if item.name == 'programs-events':
             item.order = 290
             break
-
-@hooks.register('insert_global_admin_js')
-def global_admin_js():
-    return format_html(
-        '<script type="text/javascript" src="{}">',
-        static("js/library-programs.js")
-    )
-
