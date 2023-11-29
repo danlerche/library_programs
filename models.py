@@ -380,7 +380,7 @@ class Event(Page, Orderable):
                     #messages.success(request, 'You have been added to the waitlist for ' + self.title)
                     status = 'waitlisted'
                     submission_email = registration_form.cleaned_data['email']
-                    subject = 'You have been added to the wait list for ' + self.title
+                    subject = 'You have been added to the wait listed for ' + self.title
                     plain_message = strip_tags(self.success_email_msg)
                     from_email = settings.EMAIL_HOST_USER
                     recipient_list = [submission_email]
@@ -391,12 +391,9 @@ class Event(Page, Orderable):
                 registration_form_page = RegistrationFormPage.objects.get(pk=self.registration_form_chooser)
                 registration_form = registration_form_page.get_form(page=self, user=request.user)
                 status = ''
-                print('form chooser is not none, but the form has not posted')
-
             elif self.registration_form_chooser is None:
                 status = ''
                 registration_form = ''
-                print("no registration form has been attached")
             return registration_form, status
         registration_form, status = registration()
         if status == 'registered':
