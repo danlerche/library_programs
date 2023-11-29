@@ -145,7 +145,10 @@ def add_yahoo_calendar(context, page_id):
         time_from = datetime.datetime.combine(event_date.event_date, event_date.time_from)
         time_to = datetime.datetime.combine(event_date.event_date, event_date.time_to)
         dur_td = time_to - time_from
-    dur_str = str(dur_td)
+        if dur_td is not None:
+            dur_str = str(dur_td)
+        else: 
+            dur_str = ''
     sub = ':'
     repl = '*'
     n = 2

@@ -247,6 +247,7 @@ class Event(Page, Orderable):
     spots_available = models.PositiveIntegerField(default=0)
     wait_list_spots = models.PositiveIntegerField(default=0,)
     registration_form_chooser = models.ForeignKey('wagtailcore.Page', blank=True, null=True, on_delete=models.SET_NULL, related_name='embedded_registration_form_page', help_text='Select a Registration Form that will be embedded on this page.')
+    enable_email = models.BooleanField(default=False)
     success_email_msg = RichTextField(blank=True, null=True, verbose_name="Body of the success email")
     waitlist_email_msg = models.CharField(max_length=2000, blank=True, null=True, verbose_name="Body of the waitlist email")
     success_page = models.ForeignKey('wagtailcore.Page', blank=True, on_delete=models.SET_NULL, null=True, related_name="registration_success")
@@ -261,15 +262,12 @@ class Event(Page, Orderable):
         wait_list_remaining = self.wait_list_spots - wait_listed
         event_id = Event.objects.get(id=self.page_ptr_id)
         
-        def display_event_dt():
-            event_date_time_to = datetime.datetime.combine(self.event_date, self.time_to)
-            if self.until is not None: 
-                until_date_time_to = datetime.datetime.combine(self.until, self.time_to)
-            else:
-                until_date_time_to = ''
-            return (event_date_time_to, until_date_time_to)
-        ev_dt, ev_udt = display_event_dt()
-
+      
+        event_date_time_to = datetime.datetime.combine(self.event_date, self.time_to)
+        if self.until is not None: 
+            until_date_time_to = datetime.datetime.combine(self.until, self.time_to)
+        else:
+            until_date_time_to = ''
         #function to generate .ics files for integration into calendars
         def create_ical(title, desc, start, end, until, curr_date, repeats, ics_week_interval, ics_weekday, time_from, exdate, location):
             cal = Calendar()
@@ -366,6 +364,14 @@ class Event(Page, Orderable):
                     #messages.success(request, 'You have succesfully registered for ' + self.title)
                     status = 'registered'
                     #email function here
+                    submission_email = registration_form.cleaned_data['email']
+                    subject = 'You have succesfully registered for ' + self.title
+                    plain_message = strip_tags(self.success_email_msg)
+                    from_email = settings.EMAIL_HOST_USER
+                    recipient_list = [submission_email]
+                    if from_email !='' and self.enable_email == True:
+                        send_mail(subject, plain_message, from_email, [submission_email], html_message=self.success_email_msg)
+
                 elif registration_form.is_valid() and reg_spots_remaining == 0 and wait_list_remaining > 0:
                     form_submission = registration_form_page.process_form_submission(registration_form)
                     user_id = get_primary
@@ -373,7 +379,13 @@ class Event(Page, Orderable):
                     registration.save()
                     #messages.success(request, 'You have been added to the waitlist for ' + self.title)
                     status = 'waitlisted'
-                    #email function here
+                    submission_email = registration_form.cleaned_data['email']
+                    subject = 'You have been added to the wait list for ' + self.title
+                    plain_message = strip_tags(self.success_email_msg)
+                    from_email = settings.EMAIL_HOST_USER
+                    recipient_list = [submission_email]
+                    if from_email !='' and self.enable_email == True:
+                        send_mail(subject, plain_message, from_email, [submission_email], html_message=self.success_email_msg)
                 
             elif self.registration_form_chooser is not None:
                 registration_form_page = RegistrationFormPage.objects.get(pk=self.registration_form_chooser)
@@ -394,8 +406,8 @@ class Event(Page, Orderable):
         if status == '':
             return render(request, 'library_programs/event.html', {
                 'page': self,
-                'event_date_time_to': ev_dt,
-                'until_date_time_to': ev_udt,
+                'event_date_time_to': event_date_time_to,
+                'until_date_time_to': until_date_time_to,
                 'registration_form': registration_form,
                 'reg_spots_remaining': reg_spots_remaining,
                 'wait_list_remaining': wait_list_remaining,
@@ -430,12 +442,6 @@ class Event(Page, Orderable):
             FieldPanel('event_image'),
             FieldPanel('location'),
             FieldPanel('tutorial_link'),
-#            FieldRowPanel(
-#            [
-#            PageChooserPanel('form_page', ['webform.FormPage']),
-#            ],
-#            heading="Optional Form Page",
-#            ),
             FieldPanel('featured_on_home_page'),
     ], heading = "Program Info"), 
         ObjectList([
@@ -444,8 +450,12 @@ class Event(Page, Orderable):
             FieldPanel('wait_list_spots', classname="full"),
             PageChooserPanel('registration_form_chooser', ['library_programs.RegistrationFormPage']),
             PageChooserPanel('success_page'),
-            FieldPanel('success_email_msg', classname="full"),
-            FieldPanel('waitlist_email_msg', widget=forms.Textarea, classname="full"),
+            MultiFieldPanel([
+                FieldPanel('enable_email'),
+                FieldPanel('success_email_msg'),
+                FieldPanel('waitlist_email_msg'),
+                ], heading="email settings")
+           
             ], heading="Registration Setup")
         ])
 
