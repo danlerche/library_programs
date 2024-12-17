@@ -19,7 +19,9 @@
 <h1>{{ page.title }}</h1>
 </div>
 </div>
-
+{% now 'c' as today_dt %}
+  {% with today=today_dt %}
+  {% if event_date_time_to|date:"c" > today and page.until == None or until_date_time_to|date:"c" > today and page.until != None %}
 {% if page.enable_registration == True  %}
 {% if reg_spots_remaining > 0 and page.registration_form_chooser != None %}
 <div class="alert alert-success">Registration Is Open</div>
@@ -31,6 +33,8 @@
 <div class="alert alert-danger">Registration is now full</div>
 {% endif %}
 {% endif %}
+{% endif %}
+{% endwith %}
 
 <div class="row">
   <div class="col-9 event-image d-lg-none mb-2">
@@ -149,7 +153,12 @@
 </div>
 
 {% if page.enable_registration == 1 %}
+ {% now 'c' as today_dt %}
+  {% with today=today_dt %}
+  {% if event_date_time_to|date:"c" > today and page.until == None or until_date_time_to|date:"c" > today and page.until != None %}
 {% include "library_programs/registration/registration.html" %}
+{% endif %}
+{% endwith %}
 {% endif %}
 
 </div>

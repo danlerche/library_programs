@@ -17,16 +17,33 @@ def events_with_registration(request):
 
 	num_reg_dict = {item['event_name_id']: item for item in num_reg_qs}
 	num_wl_dict = {item['event_name_id']: item for item in num_wl_qs}
+
+	if not num_reg_dict:
+		registered = 'No Registrations'
+	else: 
+		registered = num_reg_dict
 	
-	registration_info = [{'event_name_id': reg_info['event_name_id'], 
-	'event_title': reg_info['event_title'], 
-	'spots_available': reg_info['spots_available'],
-	'wait_list_spots': reg_info['wait_list_spots'],
-	'registered': num_reg_dict[reg_info['event_name_id']]['registered'],
-	'wait_listed': next((wl['wait_listed'] for wl in num_wl_qs if wl['event_name_id'] == reg_info['event_name_id']), 0)
-	}  
-	for reg_info in basic_reg_info]
-			
+	if not num_reg_dict:
+		registration_info = [{'event_name_id': reg_info['event_name_id'], 
+		'event_title': reg_info['event_title'], 
+		'spots_available': reg_info['spots_available'],
+		'wait_list_spots': reg_info['wait_list_spots'],
+		'registered': 'No Registrations',
+		'wait_listed': next((wl['wait_listed'] 
+		for wl in num_wl_qs if wl['event_name_id'] == reg_info['event_name_id']), 0)}  
+		for reg_info in basic_reg_info]
+	else:
+		registration_info = [{'event_name_id': reg_info['event_name_id'], 
+		'event_title': reg_info['event_title'], 
+		'spots_available': reg_info['spots_available'],
+		'wait_list_spots': reg_info['wait_list_spots'],
+		'registered': num_reg_dict[reg_info['event_name_id']]['registered'],
+		'wait_listed': next((wl['wait_listed'] 
+		for wl in num_wl_qs if wl['event_name_id'] == reg_info['event_name_id']), 0)} 
+		for reg_info in basic_reg_info]
+
 	return render(request, 'library_programs/registration/admin_snippet/events_with_registration.html', {
         'registration_info': registration_info,
     })
+
+    #'registered': num_reg_dict[reg_info['event_name_id']]['registered'],
