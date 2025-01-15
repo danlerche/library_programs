@@ -1,21 +1,23 @@
 {% load wagtailcore_tags static library_programs_tags %}
+<script src="{% static 'js/index.global.js' %}"></script>
+<script src="{% static 'js/fullcalendar-ext.js' %}"></script>
 <link rel='stylesheet' type='text/css' href="{% static 'css/fullcalendar.css' %}" />
-<script src="{% static 'js/fullcalendar.js' %}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
+   
     {% for events_qs in events_qs %}
     var event_title_{{ events_qs.id }} = "{{ events_qs.title }}";
-    var decoded_event_title_{{ events_qs.id }} = event_title_{{ events_qs.id }}.replace("&amp;", "&");
-
+    var decoded_event_title_{{ events_qs.id }} = event_title_{{ events_qs.id }}.replace("&amp;", "&").replace("&#x27;", "'");
     {% endfor %}
+   
     var calendar = new FullCalendar.Calendar(calendarEl, {
     themeSystem: 'bootstrap5',
       headerToolbar: {
-        left: 'dayGridMonth,listYear',
-        center: 'title',
-        right: 'prevYear,prev,next,nextYear'
-      },
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+            },
       businessHours: [ // specify an array instead
   {
     daysOfWeek: [ 1, 3, 5, 6 ], // Monday, Wednesday, Friday, Saturday
@@ -34,6 +36,12 @@ eventTimeFormat: {
   meridiem: 'short',
 },
       editable: true,
+
+     views: {
+                dayGridMonth: { buttonText: 'month' },
+                timeGridWeek: { buttonText: 'week' },
+                timeGridDay: { buttonText: 'day' }
+            },
       initialView: 'dayGridMonth',
       events: [
             {% for all_events in all_events %}
@@ -41,8 +49,8 @@ eventTimeFormat: {
             {% if events_qs.id == all_events.id %}
             {
                 title: decoded_event_title_{{ events_qs.id }},
-                start: '{{ all_events.event_date|date:"o-m-d"}}T{{ events_qs.time_from|date:"H:i:s" }}',
-                end: '{{ all_events.event_date|date:"o-m-d"}}T{{ events_qs.time_to|date:"H:i:s" }}',
+                start: '{{ all_events.event_date|date:"Y-m-d"}}T{{ events_qs.time_from|date:"H:i:s" }}',
+                end: '{{ all_events.event_date|date:"Y-m-d"}}T{{ events_qs.time_to|date:"H:i:s" }}',
                 url: '{{ events_qs.url }}',
                 className: '{% for age in events_qs.age_range.all %}{% if forloop is not None %}{% if forloop.first == forloop.last %}{{ age.audience_name|slugify }}{% elif forloop.counter > 1 %}all-ages{% endif %}{% endif %}{% endfor %}',
             },
@@ -56,6 +64,8 @@ eventTimeFormat: {
   });
 
 $("#calendar .fc-event-time").insertAfter("#calendar .fc-event-title");
+// On the weekday of the list view, set aria-hidden to false
+//$('.fc-list-day-side-text').attr('aria-hidden', 'false');
 </script>
 
 <div class="row">

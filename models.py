@@ -453,7 +453,8 @@ class Event(Page, Orderable):
                 FieldPanel('waitlist_email_msg'),
                 ], heading="email settings")
            
-            ], heading="Registration Setup")
+            ], heading="Registration Setup"),
+        ObjectList(Page.promote_panels, heading='Promote'),
         ])
 
     base_form_class =  EventEditExtraValidation

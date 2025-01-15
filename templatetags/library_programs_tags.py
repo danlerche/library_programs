@@ -15,11 +15,15 @@ register = template.Library()
 
 def db_queries():
     today = datetime.datetime.now()
+    time_today = today.time()
     events_qs = Event.objects.live()
     s_events_qs = Event.objects.filter(repeats__isnull=True).live()
     r_events_qs = Event.objects.filter(repeats__isnull=False).live()
-    featured_event = Event.objects.live().filter(Q(until__gte=today, until__isnull=False, featured_on_home_page=True) | \
-        Q(event_date__gte=today, until__isnull=True, featured_on_home_page=True))
+    featured_event = Event.objects.live().filter(
+        Q(event_date=today, time_to__gt=time_today, until__isnull=True, featured_on_home_page=True) | \
+        Q(until=today, time_to__gt=time_today, until__isnull=False, featured_on_home_page=True) | \
+        Q(event_date__gt=today, until__isnull=True, featured_on_home_page=True) | \
+        Q(until__gt=today, until__isnull=False, featured_on_home_page=True))
     full_calendar_link = FullCalendarLink.objects.all()
     return today, events_qs, s_events_qs, r_events_qs, featured_event, full_calendar_link
 
@@ -145,10 +149,7 @@ def add_yahoo_calendar(context, page_id):
         time_from = datetime.datetime.combine(event_date.event_date, event_date.time_from)
         time_to = datetime.datetime.combine(event_date.event_date, event_date.time_to)
         dur_td = time_to - time_from
-        if dur_td is not None:
-            dur_str = str(dur_td)
-        else: 
-            dur_str = ''
+    dur_str = str(dur_td)
     sub = ':'
     repl = '*'
     n = 2
